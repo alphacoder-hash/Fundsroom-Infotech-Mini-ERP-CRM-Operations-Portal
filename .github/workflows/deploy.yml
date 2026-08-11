@@ -91,14 +91,6 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Install frontend deps & build
-        working-directory: frontend
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-        run: |
-          npm install
-          npm run build
-
       - name: Deploy Frontend (Vercel)
         working-directory: frontend
         env:
@@ -108,5 +100,6 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
         run: |
           npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          npx vercel env add VITE_API_URL production <<< "$VITE_API_URL" || true
           npx vercel build --prod --token=$VERCEL_TOKEN
           npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
