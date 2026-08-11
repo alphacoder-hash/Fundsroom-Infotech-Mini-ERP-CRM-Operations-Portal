@@ -272,7 +272,127 @@ Frontend runs on: `http://localhost:5173`
 
 ---
 
-## Postman Collection
+## UI Documentation
+
+### Design System
+- **No UI framework** — fully custom CSS with CSS variables (design tokens)
+- **Font**: Inter (Google Fonts)
+- **Color palette**: Indigo primary, semantic green/amber/red for status badges
+- **Dark sidebar** (`#1c1c2e`) + light content area (`#f4f6fb`)
+- **Responsive**: Mobile-first with hamburger sidebar toggle on screens < 768px
+
+### Pages & Routes
+
+| Route | Page | Access |
+|-------|------|--------|
+| `/` | Home / Landing page | Public |
+| `/login` | Login page | Public |
+| `/app/dashboard` | Dashboard with stats | All roles |
+| `/app/customers` | Customer list | All roles |
+| `/app/customers/:id` | Customer detail + notes | All roles |
+| `/app/products` | Product list + stock | All roles |
+| `/app/challans` | Challan list | All roles |
+| `/app/challans/:id` | Challan detail + actions | All roles |
+
+### Layout
+- **Sidebar** (240px, fixed) — logo, navigation links, user info, logout
+- **Topbar** (60px, sticky) — page title, role badge, hamburger on mobile
+- **Page content** — padded main area with cards
+- Sidebar auto-closes on mobile when a nav item is clicked
+
+### UI Components
+
+**Cards** — white surface with border and shadow, used for all content sections
+
+**Stat Cards** — dashboard overview cards with colored left border, icon, value and label. Clickable to navigate to the relevant module.
+
+**Badges** — pill-shaped status indicators:
+- `badge-success` — green (Active, Confirmed, IN)
+- `badge-warning` — amber (Lead, Draft)
+- `badge-danger` — red (Inactive, Cancelled, OUT, low stock)
+- `badge-info` — blue (Retail)
+- `badge-default` — grey (Wholesale, role labels)
+
+**Modals** — centered overlay with backdrop blur, slide-up animation. Used for Add/Edit forms and stock movement log.
+
+**Tables** — full-width with sticky header, hover highlight, responsive horizontal scroll wrapper.
+
+**Forms** — labeled inputs with uppercase letter-spaced labels, focus ring on active, red border + message on error.
+
+**Buttons**:
+- `btn-primary` — dark fill, used for main actions
+- `btn-secondary` — outlined, used for secondary actions
+- `btn-success` — green, used for confirm actions
+- `btn-danger` — red, used for cancel/delete actions
+- `btn-sm` — smaller padding variant
+
+**Banners** — full-width inline alerts (success/warning/danger) shown inside cards for contextual feedback.
+
+**Pagination** — prev/next buttons with current page indicator and total count.
+
+**Empty States** — centered icon + message shown when a list has no data.
+
+**Loading** — centered spinner shown while API calls are in progress.
+
+### Page-by-Page UI Flow
+
+**Login Page**
+- Centered card with logo, email + password fields
+- Shows error message on invalid credentials
+- Redirects to `/app/dashboard` on success
+
+**Dashboard**
+- 4 stat cards: Total Customers, Products, Challans, Low Stock Alerts
+- Quick Actions panel — buttons to navigate to each module
+- Role Permissions panel — highlights the current user's role
+
+**Customers Page**
+- Search bar (name / mobile / business)
+- Filter dropdowns for Status and Type
+- Table with name, mobile, business, type, status, follow-up date
+- Overdue follow-up dates highlighted in red
+- Add / Edit via modal (Admin + Sales only)
+- View button navigates to customer detail
+
+**Customer Detail Page**
+- Full customer info grid
+- Follow-up notes panel — add timestamped notes (Ctrl+Enter shortcut)
+- Recent challans table linked to challan detail
+- Edit button opens pre-filled modal
+
+**Products Page**
+- Search bar (name / SKU) + category filter
+- Table with product image thumbnail, name, SKU, category, price, stock, location
+- Low stock badge with ⚠️ when `currentStock <= minStockAlert`
+- Stock IN/OUT modal with live preview of stock after update
+- Stock Movement Log modal with full history
+- Product image upload (JPEG/PNG/WebP, max 5MB) stored on AWS S3
+- Add / Edit via modal (Admin + Warehouse only)
+
+**Challans Page**
+- Filter by status (Draft / Confirmed / Cancelled)
+- Table with challan number, customer, items count, total qty, total amount, status, created by, date
+- Create Challan modal:
+  - Select customer dropdown
+  - Dynamic product rows (add/remove)
+  - Live stock availability check per row
+  - Live subtotal and grand total calculation
+  - Save as Draft or Confirmed
+- Warning shown when confirming (stock will be deducted)
+
+**Challan Detail Page**
+- Full challan info grid (number, status, customer, created by, dates, totals)
+- Products table with snapshots (name, SKU, unit price, qty, subtotal)
+- Confirm / Cancel buttons (Draft only, Admin + Sales only)
+- Export PDF button — generates a formatted A4 PDF invoice via `pdf-lib`
+- Status banners (confirmed / cancelled / draft)
+
+### Responsive Behaviour
+- **Desktop (> 768px)**: Sidebar always visible, full table layout
+- **Mobile (≤ 768px)**: Sidebar hidden, hamburger button in topbar toggles it, dark overlay behind sidebar, detail grids collapse to single column
+
+---
+
 
 A Postman collection is included at the root of the repository:
 
