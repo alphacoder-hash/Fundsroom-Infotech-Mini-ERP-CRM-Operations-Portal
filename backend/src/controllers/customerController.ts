@@ -7,7 +7,7 @@ const VALID_STATUSES = ['LEAD', 'ACTIVE', 'INACTIVE'];
 
 // GET /customers
 export const getCustomers = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { search, status, type, page = '1', limit = '10' } = req.query;
+  const { search, status, type, page = '1', limit = '10' } = req.query as Record<string, string>;
 
   const pageNum = Math.max(1, parseInt(page as string) || 1);
   const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
@@ -51,7 +51,7 @@ export const getCustomer = async (req: AuthRequest, res: Response): Promise<void
 
 // POST /customers
 export const createCustomer = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { name, mobile, email, businessName, gstNumber, type, address, status, followUpDate, notes } = req.body;
+  const { name, mobile, email, businessName, gstNumber, type, address, status, followUpDate, notes } = req.body as Record<string, string>;
 
   if (!name || !name.trim()) { res.status(400).json({ success: false, message: 'Customer name is required' }); return; }
   if (!mobile || !mobile.trim()) { res.status(400).json({ success: false, message: 'Mobile number is required' }); return; }
@@ -83,7 +83,7 @@ export const createCustomer = async (req: AuthRequest, res: Response): Promise<v
 
 // PUT /customers/:id
 export const updateCustomer = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { name, mobile, email, businessName, gstNumber, type, address, status, followUpDate, notes } = req.body;
+  const { name, mobile, email, businessName, gstNumber, type, address, status, followUpDate, notes } = req.body as Record<string, string>;
 
   if (!name || !name.trim()) { res.status(400).json({ success: false, message: 'Customer name is required' }); return; }
   if (!mobile || !mobile.trim()) { res.status(400).json({ success: false, message: 'Mobile number is required' }); return; }
@@ -119,7 +119,7 @@ export const updateCustomer = async (req: AuthRequest, res: Response): Promise<v
 
 // POST /customers/:id/notes
 export const addNote = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { note } = req.body;
+  const { note } = req.body as Record<string, string>;
   if (!note || !note.trim()) {
     res.status(400).json({ success: false, message: 'Note is required' });
     return;

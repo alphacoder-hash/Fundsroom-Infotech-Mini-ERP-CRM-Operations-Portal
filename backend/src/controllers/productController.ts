@@ -5,7 +5,7 @@ import { uploadToS3, deleteFromS3 } from '../s3';
 
 // GET /products
 export const getProducts = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { search, category, page = '1', limit = '10' } = req.query;
+  const { search, category, page = '1', limit = '10' } = req.query as Record<string, string>;
 
   const pageNum = Math.max(1, parseInt(page as string) || 1);
   const limitNum = Math.min(200, Math.max(1, parseInt(limit as string) || 10));
@@ -53,7 +53,7 @@ export const getProduct = async (req: AuthRequest, res: Response): Promise<void>
 
 // POST /products
 export const createProduct = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { name, sku, category, unitPrice, currentStock, minStockAlert, location } = req.body;
+  const { name, sku, category, unitPrice, currentStock, minStockAlert, location } = req.body as Record<string, string>;
 
   if (!name || !name.trim()) { res.status(400).json({ success: false, message: 'Product name is required' }); return; }
   if (!sku || !sku.trim()) { res.status(400).json({ success: false, message: 'SKU is required' }); return; }
@@ -87,7 +87,7 @@ export const createProduct = async (req: AuthRequest, res: Response): Promise<vo
 
 // PUT /products/:id
 export const updateProduct = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { name, sku, category, unitPrice, minStockAlert, location } = req.body;
+  const { name, sku, category, unitPrice, minStockAlert, location } = req.body as Record<string, string>;
 
   if (!name || !name.trim()) { res.status(400).json({ success: false, message: 'Product name is required' }); return; }
   if (!sku || !sku.trim()) { res.status(400).json({ success: false, message: 'SKU is required' }); return; }
@@ -123,7 +123,7 @@ export const updateProduct = async (req: AuthRequest, res: Response): Promise<vo
 
 // POST /products/:id/stock
 export const updateStock = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { quantity, type, reason } = req.body;
+  const { quantity, type, reason } = req.body as Record<string, string>;
 
   if (!type || !['IN', 'OUT'].includes(type)) { res.status(400).json({ success: false, message: 'Movement type must be IN or OUT' }); return; }
   if (!quantity || isNaN(parseInt(quantity)) || parseInt(quantity) <= 0) { res.status(400).json({ success: false, message: 'Quantity must be a positive number' }); return; }
