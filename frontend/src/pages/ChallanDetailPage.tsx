@@ -89,7 +89,7 @@ const ChallanDetailPage: React.FC = () => {
 
         {/* Inline error for status actions */}
         {actionError && (
-          <div style={{ margin: '0 0 16px', padding: '10px 14px', background: 'var(--danger-light)', borderRadius: 6, color: 'var(--danger)', fontSize: 13 }}>
+          <div className="banner banner-danger" style={{ margin: '0 0 16px' }}>
             {actionError}
           </div>
         )}
@@ -176,17 +176,17 @@ const ChallanDetailPage: React.FC = () => {
         </div>
 
         {challan.status === 'CONFIRMED' && (
-          <div style={{ marginTop: 12, padding: '10px 16px', background: 'var(--success-light)', borderRadius: 8, color: 'var(--success)', fontSize: 13 }}>
+          <div className="banner banner-success" style={{ marginTop: 12 }}>
             ✓ Challan confirmed. Stock has been deducted from inventory.
           </div>
         )}
         {challan.status === 'CANCELLED' && (
-          <div style={{ marginTop: 12, padding: '10px 16px', background: 'var(--danger-light)', borderRadius: 8, color: 'var(--danger)', fontSize: 13 }}>
+          <div className="banner banner-danger" style={{ marginTop: 12 }}>
             ✕ Challan cancelled. No stock was deducted.
           </div>
         )}
         {challan.status === 'DRAFT' && (
-          <div style={{ marginTop: 12, padding: '10px 16px', background: 'var(--warning-light)', borderRadius: 8, color: 'var(--warning)', fontSize: 13 }}>
+          <div className="banner banner-warning" style={{ marginTop: 12 }}>
             ⏳ Draft — stock will be deducted only when confirmed.
           </div>
         )}
