@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import prisma from '../prismaClient';
 import { AuthRequest } from '../middleware/auth';
+import { CustomerType, CustomerStatus } from '@prisma/client';
 
 const VALID_TYPES = ['RETAIL', 'WHOLESALE', 'DISTRIBUTOR'];
 const VALID_STATUSES = ['LEAD', 'ACTIVE', 'INACTIVE'];
@@ -9,20 +10,20 @@ const VALID_STATUSES = ['LEAD', 'ACTIVE', 'INACTIVE'];
 export const getCustomers = async (req: AuthRequest, res: Response): Promise<void> => {
   const { search, status, type, page = '1', limit = '10' } = req.query as Record<string, string>;
 
-  const pageNum = Math.max(1, parseInt(page as string) || 1);
-  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
   const skip = (pageNum - 1) * limitNum;
 
   const where: any = {};
   if (search) {
     where.OR = [
-      { name: { contains: search as string, mode: 'insensitive' } },
-      { mobile: { contains: search as string } },
-      { businessName: { contains: search as string, mode: 'insensitive' } },
+      { name: { contains: search, mode: 'insensitive' } },
+      { mobile: { contains: search } },
+      { businessName: { contains: search, mode: 'insensitive' } },
     ];
   }
-  if (status && VALID_STATUSES.includes(status as string)) where.status = status;
-  if (type && VALID_TYPES.includes(type as string)) where.type = type;
+  if (status && VALID_STATUSES.includes(status)) where.status = status as CustomerStatus;
+  if (type && VALID_TYPES.includes(type)) where.type = type as CustomerType;
 
   try {
     const [customers, total] = await Promise.all([
@@ -68,9 +69,9 @@ export const createCustomer = async (req: AuthRequest, res: Response): Promise<v
         email: email?.trim() || null,
         businessName: businessName?.trim() || null,
         gstNumber: gstNumber?.trim() || null,
-        type,
+        type: type as CustomerType,
         address: address?.trim() || null,
-        status: status || 'LEAD',
+        status: (status || 'LEAD') as CustomerStatus,
         followUpDate: followUpDate ? new Date(followUpDate) : null,
         notes: notes?.trim() || null,
       },
@@ -104,9 +105,9 @@ export const updateCustomer = async (req: AuthRequest, res: Response): Promise<v
         email: email?.trim() || null,
         businessName: businessName?.trim() || null,
         gstNumber: gstNumber?.trim() || null,
-        type,
+        type: type as CustomerType,
         address: address?.trim() || null,
-        status: status || existing.status,
+        status: (status as CustomerStatus) || existing.status,
         followUpDate: followUpDate ? new Date(followUpDate) : null,
         notes: notes?.trim() || null,
       },

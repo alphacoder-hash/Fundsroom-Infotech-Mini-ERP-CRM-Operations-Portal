@@ -17,7 +17,7 @@ const VALID_CHALLAN_STATUSES = ['DRAFT', 'CONFIRMED', 'CANCELLED'];
 
 // GET /challans
 export const getChallans = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { status, customerId, page = '1', limit = '10' } = req.query;
+  const { status, customerId, page = '1', limit = '10' } = req.query as Record<string, string>;
 
   const pageNum = Math.max(1, parseInt(page as string) || 1);
   const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
@@ -171,7 +171,7 @@ export const createChallan = async (req: AuthRequest, res: Response): Promise<vo
 
 // PATCH /challans/:id/status
 export const updateChallanStatus = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { status } = req.body;
+  const { status } = req.body as Record<string, string>;
 
   if (!status || !['CONFIRMED', 'CANCELLED'].includes(status)) {
     res.status(400).json({ success: false, message: 'Status must be CONFIRMED or CANCELLED' }); return;
@@ -181,7 +181,7 @@ export const updateChallanStatus = async (req: AuthRequest, res: Response): Prom
     const challan = await prisma.salesChallan.findUnique({
       where: { id: req.params.id },
       include: { items: true },
-    });
+    }) as any;
     if (!challan) { res.status(404).json({ success: false, message: 'Challan not found' }); return; }
     if (challan.status !== 'DRAFT') {
       res.status(400).json({ success: false, message: `Challan is already ${challan.status}. Only DRAFT challans can be updated` }); return;
@@ -210,7 +210,7 @@ export const updateChallanStatus = async (req: AuthRequest, res: Response): Prom
           });
         }
       }
-      return tx.salesChallan.update({ where: { id: req.params.id }, data: { status } });
+      return tx.salesChallan.update({ where: { id: req.params.id }, data: { status: status as any } });
     });
 
     res.json({ success: true, data: updated });

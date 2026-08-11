@@ -1,24 +1,25 @@
 import { Response } from 'express';
 import prisma from '../prismaClient';
 import { AuthRequest } from '../middleware/auth';
+import { MovementType } from '@prisma/client';
 import { uploadToS3, deleteFromS3 } from '../s3';
 
 // GET /products
 export const getProducts = async (req: AuthRequest, res: Response): Promise<void> => {
   const { search, category, page = '1', limit = '10' } = req.query as Record<string, string>;
 
-  const pageNum = Math.max(1, parseInt(page as string) || 1);
-  const limitNum = Math.min(200, Math.max(1, parseInt(limit as string) || 10));
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const limitNum = Math.min(200, Math.max(1, parseInt(limit) || 10));
   const skip = (pageNum - 1) * limitNum;
 
   const where: any = {};
   if (search) {
     where.OR = [
-      { name: { contains: search as string, mode: 'insensitive' } },
-      { sku: { contains: search as string, mode: 'insensitive' } },
+      { name: { contains: search, mode: 'insensitive' } },
+      { sku: { contains: search, mode: 'insensitive' } },
     ];
   }
-  if (category) where.category = { contains: category as string, mode: 'insensitive' };
+  if (category) where.category = { contains: category, mode: 'insensitive' };
 
   try {
     const [products, total] = await Promise.all([
@@ -147,7 +148,7 @@ export const updateStock = async (req: AuthRequest, res: Response): Promise<void
         data: {
           productId: req.params.id,
           quantityChanged: qty,
-          type,
+          type: type as MovementType,
           reason: reason?.trim() || null,
           createdBy: req.user!.id,
         },
@@ -178,7 +179,6 @@ export const uploadProductImage = async (req: AuthRequest, res: Response): Promi
     const product = await prisma.product.findUnique({ where: { id: req.params.id } });
     if (!product) { res.status(404).json({ success: false, message: 'Product not found' }); return; }
 
-    // Delete old image from S3 if exists
     if (product.imageUrl) await deleteFromS3(product.imageUrl);
 
     const imageUrl = await uploadToS3(file.buffer, file.mimetype);
