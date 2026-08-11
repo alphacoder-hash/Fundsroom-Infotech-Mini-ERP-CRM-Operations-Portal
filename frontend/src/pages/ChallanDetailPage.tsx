@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../config';
 import { useAuth } from '../context/AuthContext';
+import { exportChallanPDF } from '../utils/exportPDF';
 
 const statusBadge: Record<string, string> = { DRAFT: 'badge-warning', CONFIRMED: 'badge-success', CANCELLED: 'badge-danger' };
 
@@ -15,6 +16,12 @@ const ChallanDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    setExporting(true);
+    try { await exportChallanPDF(challan); } finally { setExporting(false); }
+  };
 
   const fetchChallan = async () => {
     try {
@@ -65,16 +72,19 @@ const ChallanDetailPage: React.FC = () => {
               <span className={`badge ${statusBadge[challan.status]}`}>{challan.status}</span>
             </div>
           </div>
-          {canManage && challan.status === 'DRAFT' && (
-            <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <button className="btn btn-secondary" onClick={handleExportPDF} disabled={exporting}>
+              {exporting ? 'Generating…' : '⬇ Export PDF'}
+            </button>
+            {canManage && challan.status === 'DRAFT' && (<>
               <button className="btn btn-success" onClick={() => updateStatus('CONFIRMED')} disabled={updating}>
                 ✓ Confirm Challan
               </button>
               <button className="btn btn-danger" onClick={() => updateStatus('CANCELLED')} disabled={updating}>
                 ✕ Cancel
               </button>
-            </div>
-          )}
+            </>)}
+          </div>
         </div>
 
         {/* Inline error for status actions */}
