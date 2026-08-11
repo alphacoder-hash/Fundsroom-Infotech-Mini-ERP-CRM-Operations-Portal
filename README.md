@@ -265,10 +265,7 @@ Frontend runs on: `http://localhost:5173`
 2. Set root directory to `frontend`
 3. Add environment variable: `VITE_API_URL` = your Render backend URL
 
-### AWS Deployment (Bonus)
-- EC2 (t2.micro free tier) for backend
-- S3 + CloudFront for frontend static hosting
-- RDS PostgreSQL or keep Supabase
+
 
 ---
 
