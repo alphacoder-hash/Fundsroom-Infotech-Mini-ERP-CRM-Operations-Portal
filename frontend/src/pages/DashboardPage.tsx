@@ -33,25 +33,25 @@ const DashboardPage: React.FC = () => {
       label: 'Total Customers', value: stats.customers,
       color: '#4f46e5', bg: '#eef2ff',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-      path: '/customers',
+      path: '/app/customers',
     },
     {
       label: 'Products in Catalog', value: stats.products,
       color: '#10b981', bg: '#ecfdf5',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>,
-      path: '/products',
+      path: '/app/products',
     },
     {
       label: 'Sales Challans', value: stats.challans,
       color: '#f59e0b', bg: '#fffbeb',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
-      path: '/challans',
+      path: '/app/challans',
     },
     {
       label: 'Low Stock Alerts', value: stats.lowStock,
       color: '#ef4444', bg: '#fef2f2',
       icon: <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-      path: '/products',
+      path: '/app/products',
     },
   ];
 
@@ -74,7 +74,7 @@ const DashboardPage: React.FC = () => {
             Here's what's happening with your business today.
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/challans')}>
+        <button className="btn btn-primary" onClick={() => navigate('/app/challans')}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 14, height: 14 }}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New Challan
         </button>
@@ -109,9 +109,9 @@ const DashboardPage: React.FC = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[
-              { label: 'Add New Customer', path: '/customers', color: '#4f46e5' },
-              { label: 'Add New Product', path: '/products', color: '#10b981' },
-              { label: 'Create Sales Challan', path: '/challans', color: '#f59e0b' },
+              { label: 'Add New Customer', path: '/app/customers', color: '#4f46e5' },
+              { label: 'Add New Product', path: '/app/products', color: '#10b981' },
+              { label: 'Create Sales Challan', path: '/app/challans', color: '#f59e0b' },
             ].map(a => (
               <button
                 key={a.label}

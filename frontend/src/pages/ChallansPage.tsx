@@ -145,7 +145,7 @@ const ChallansPage: React.FC = () => {
                     </td></tr>
                   ) : challans.map(ch => (
                     <tr key={ch.id}>
-                      <td><strong style={{ color: 'var(--accent)' }}>{ch.challanNumber}</strong></td>
+                      <td><strong style={{ color: 'var(--indigo)' }}>{ch.challanNumber}</strong></td>
                       <td>
                         <div>{ch.customer?.name}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{ch.customer?.businessName || ''}</div>
@@ -154,10 +154,10 @@ const ChallansPage: React.FC = () => {
                       <td>{ch.totalQuantity}</td>
                       <td style={{ fontWeight: 600 }}>₹{getChallanTotal(ch).toFixed(2)}</td>
                       <td><span className={`badge ${statusBadge[ch.status]}`}>{ch.status}</span></td>
-                      <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ch.user?.email?.split('@')[0]}</td>
-                      <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{new Date(ch.createdAt).toLocaleDateString()}</td>
+                      <td style={{ fontSize: 12, color: 'var(--text-3)' }}>{ch.user?.email?.split('@')[0]}</td>
+                      <td style={{ fontSize: 12, color: 'var(--text-3)' }}>{new Date(ch.createdAt).toLocaleDateString()}</td>
                       <td>
-                        <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/challans/${ch.id}`)}>View</button>
+                        <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/app/challans/${ch.id}`)}>View</button>
                       </td>
                     </tr>
                   ))}

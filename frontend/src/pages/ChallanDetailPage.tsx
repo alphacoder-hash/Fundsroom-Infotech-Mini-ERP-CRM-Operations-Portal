@@ -28,7 +28,7 @@ const ChallanDetailPage: React.FC = () => {
       const res = await api.get(`/challans/${id}`);
       setChallan(res.data.data);
     } catch {
-      navigate('/challans');
+      navigate('/app/challans');
     } finally {
       setLoading(false);
     }

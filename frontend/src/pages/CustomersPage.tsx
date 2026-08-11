@@ -150,7 +150,7 @@ const CustomersPage: React.FC = () => {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 6 }}>
-                          <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/customers/${c.id}`)}>View</button>
+                          <button className="btn btn-sm btn-secondary" onClick={() => navigate(`/app/customers/${c.id}`)}>View</button>
                           {canEdit && <button className="btn btn-sm btn-secondary" onClick={() => openEdit(c)}>Edit</button>}
                         </div>
                       </td>

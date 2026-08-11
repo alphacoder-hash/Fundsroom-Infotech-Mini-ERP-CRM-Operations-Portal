@@ -31,7 +31,7 @@ const CustomerDetailPage: React.FC = () => {
       const res = await api.get(`/customers/${id}`);
       setCustomer(res.data.data);
     } catch {
-      navigate('/customers');
+      navigate('/app/customers');
     } finally {
       setLoading(false);
     }
@@ -125,7 +125,7 @@ const CustomerDetailPage: React.FC = () => {
               <div className="detail-item"><div className="detail-label">Address</div><div className="detail-value">{customer.address || '—'}</div></div>
               <div className="detail-item">
                 <div className="detail-label">Follow-up Date</div>
-                <div className="detail-value" style={{ color: isOverdue ? 'var(--danger)' : undefined }}>
+                <div className="detail-value" style={{ color: isOverdue ? 'var(--red)' : undefined }}>
                   {customer.followUpDate ? `${new Date(customer.followUpDate).toLocaleDateString()}${isOverdue ? ' ⚠️ Overdue' : ''}` : '—'}
                 </div>
               </div>
@@ -144,12 +144,12 @@ const CustomerDetailPage: React.FC = () => {
                   <thead><tr><th>Challan #</th><th>Items</th><th>Qty</th><th>Status</th><th>Date</th></tr></thead>
                   <tbody>
                     {customer.challans.map((ch: any) => (
-                      <tr key={ch.id} onClick={() => navigate(`/challans/${ch.id}`)} style={{ cursor: 'pointer' }}>
+                      <tr key={ch.id} onClick={() => navigate(`/app/challans/${ch.id}`)} style={{ cursor: 'pointer' }}>
                         <td><strong>{ch.challanNumber}</strong></td>
                         <td>{ch.items?.length} items</td>
                         <td>{ch.totalQuantity}</td>
                         <td><span className={`badge ${ch.status === 'CONFIRMED' ? 'badge-success' : ch.status === 'CANCELLED' ? 'badge-danger' : 'badge-warning'}`}>{ch.status}</span></td>
-                        <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{new Date(ch.createdAt).toLocaleDateString()}</td>
+                        <td style={{ fontSize: 12, color: 'var(--text-3)' }}>{new Date(ch.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -176,7 +176,7 @@ const CustomerDetailPage: React.FC = () => {
                 <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleAddNote} disabled={savingNote || !note.trim()}>
                   {savingNote ? 'Saving...' : '+ Add Note'}
                 </button>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Ctrl+Enter to save</div>
+                <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 4 }}>Ctrl+Enter to save</div>
               </div>
             )}
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
@@ -187,11 +187,11 @@ const CustomerDetailPage: React.FC = () => {
                     <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                       {match ? (
                         <>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{match[1]}</div>
-                          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{match[2]}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-4)', marginBottom: 4 }}>{match[1]}</div>
+                          <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.6 }}>{match[2]}</div>
                         </>
                       ) : (
-                        <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{n}</div>
+                        <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.6 }}>{n}</div>
                       )}
                     </div>
                   );
@@ -213,7 +213,7 @@ const CustomerDetailPage: React.FC = () => {
               <button className="modal-close" onClick={() => setShowEditModal(false)}>✕</button>
             </div>
             <div className="modal-body">
-              {errors.submit && <div className="form-error" style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--danger-light)', borderRadius: 6 }}>{errors.submit}</div>}
+              {errors.submit && <div className="form-error" style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--red-light)', borderRadius: 6 }}>{errors.submit}</div>}
               <div className="form-grid">
                 <div className="form-group">
                   <label className="form-label">Full Name *</label>
@@ -235,7 +235,7 @@ const CustomerDetailPage: React.FC = () => {
                   <input className="form-input" value={form.businessName} onChange={e => f('businessName', e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">GST Number <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(optional)</span></label>
+                  <label className="form-label">GST Number <span style={{ color: 'var(--text-4)', fontWeight: 400 }}>(optional)</span></label>
                   <input className="form-input" value={form.gstNumber} onChange={e => f('gstNumber', e.target.value)} />
                 </div>
                 <div className="form-group">

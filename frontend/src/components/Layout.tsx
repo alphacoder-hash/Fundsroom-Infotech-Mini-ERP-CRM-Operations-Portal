@@ -11,17 +11,17 @@ const icons = {
 };
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
-  { path: '/customers', label: 'Customers', icon: icons.customers },
-  { path: '/products', label: 'Products & Inventory', icon: icons.products },
-  { path: '/challans', label: 'Sales Challans', icon: icons.challans },
+  { path: '/app/dashboard', label: 'Dashboard', icon: icons.dashboard },
+  { path: '/app/customers', label: 'Customers', icon: icons.customers },
+  { path: '/app/products', label: 'Products & Inventory', icon: icons.products },
+  { path: '/app/challans', label: 'Sales Challans', icon: icons.challans },
 ];
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Dashboard', subtitle: 'Overview of your business operations' },
-  '/customers': { title: 'Customer CRM', subtitle: 'Manage your customer relationships' },
-  '/products': { title: 'Products & Inventory', subtitle: 'Manage stock and product catalog' },
-  '/challans': { title: 'Sales Challans', subtitle: 'Create and manage challans' },
+  '/app/dashboard': { title: 'Dashboard', subtitle: 'Overview of your business operations' },
+  '/app/customers': { title: 'Customer CRM', subtitle: 'Manage your customer relationships' },
+  '/app/products': { title: 'Products & Inventory', subtitle: 'Manage stock and product catalog' },
+  '/app/challans': { title: 'Sales Challans', subtitle: 'Create and manage challans' },
 };
 
 const Layout: React.FC = () => {
@@ -30,7 +30,7 @@ const Layout: React.FC = () => {
   const location = useLocation();
 
   const currentPage = pageTitles[location.pathname] || { title: 'Portal', subtitle: '' };
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => { logout(); navigate('/'); };
 
   return (
     <div className="layout">
