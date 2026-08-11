@@ -8,8 +8,8 @@ A full-stack ERP/CRM system built for a wholesale/distribution company. Covers c
 
 | Service  | URL |
 |----------|-----|
-| Frontend | _To be deployed_ |
-| Backend API | _To be deployed_ |
+| Frontend | https://fundsroom-infotech-mini-erp-crm-operations-portal-p45dxff9p.vercel.app |
+| Backend API | https://fundsroom-backend-9cqq.onrender.com |
 | Database | Supabase PostgreSQL (hosted) |
 
 ---
@@ -288,7 +288,6 @@ Import it into Postman and set the `base_url` variable to `http://localhost:5000
 
 - Purchase Orders module not yet implemented
 - Invoice generation not yet implemented
-- Mobile sidebar requires hamburger toggle (currently hidden on small screens)
 - Input validation uses manual checks; Zod schema validation not yet wired up
 - No refresh token — JWT expires after 24h and user must log in again
 
