@@ -134,7 +134,7 @@ const ChallanDetailPage: React.FC = () => {
           </div>
           <div className="detail-item">
             <div className="detail-label">Total Amount</div>
-            <div className="detail-value" style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)' }}>
+            <div className="detail-value" style={{ fontSize: 18, fontWeight: 700, color: 'var(--indigo)' }}>
               ₹{totalAmount.toFixed(2)}
             </div>
           </div>
@@ -158,21 +158,21 @@ const ChallanDetailPage: React.FC = () => {
             <div key={item.id} className="challan-item-row" style={{ gridTemplateColumns: '2fr 120px 80px 110px 110px' }}>
               <span><strong>{item.productNameSnapshot}</strong></span>
               <span>
-                <code style={{ background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4, fontSize: 11 }}>
+                <code style={{ background: 'var(--surface-2)', padding: '2px 6px', borderRadius: 4, fontSize: 11 }}>
                   {item.skuSnapshot}
                 </code>
               </span>
               <span style={{ textAlign: 'right' }}>{item.quantity}</span>
-              <span style={{ textAlign: 'right', color: 'var(--text-muted)' }}>₹{parseFloat(item.unitPriceSnapshot).toFixed(2)}</span>
+              <span style={{ textAlign: 'right', color: 'var(--text-3)' }}>₹{parseFloat(item.unitPriceSnapshot).toFixed(2)}</span>
               <span style={{ textAlign: 'right', fontWeight: 600 }}>₹{(item.quantity * item.unitPriceSnapshot).toFixed(2)}</span>
             </div>
           ))}
         </div>
         <div className="challan-total">
-          <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>
+          <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>
             {challan.totalQuantity} units total
           </span>
-          <span style={{ fontSize: 20, color: 'var(--accent)' }}>₹{totalAmount.toFixed(2)}</span>
+          <span style={{ fontSize: 20, color: 'var(--indigo)' }}>₹{totalAmount.toFixed(2)}</span>
         </div>
 
         {challan.status === 'CONFIRMED' && (

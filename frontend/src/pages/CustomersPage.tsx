@@ -145,7 +145,7 @@ const CustomersPage: React.FC = () => {
                       <td>{c.businessName || '—'}</td>
                       <td><span className={`badge ${typeBadge[c.type]}`}>{c.type}</span></td>
                       <td><span className={`badge ${statusBadge[c.status]}`}>{c.status}</span></td>
-                      <td style={{ fontSize: 12, color: c.followUpDate && new Date(c.followUpDate) < new Date() ? 'var(--danger)' : 'var(--text-muted)' }}>
+                      <td style={{ fontSize: 12, color: c.followUpDate && new Date(c.followUpDate) < new Date() ? 'var(--red)' : 'var(--text-3)' }}>
                         {c.followUpDate ? new Date(c.followUpDate).toLocaleDateString() : '—'}
                       </td>
                       <td>

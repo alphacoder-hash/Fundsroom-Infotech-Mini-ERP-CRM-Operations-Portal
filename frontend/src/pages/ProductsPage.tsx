@@ -184,7 +184,7 @@ const ProductsPage: React.FC = () => {
                   ) : products.map(p => (
                     <tr key={p.id}>
                       <td><strong>{p.name}</strong></td>
-                      <td><code style={{ background: 'var(--bg-hover)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>{p.sku}</code></td>
+                      <td><code style={{ background: 'var(--surface-2)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>{p.sku}</code></td>
                       <td>{p.category}</td>
                       <td>₹{parseFloat(p.unitPrice).toFixed(2)}</td>
                       <td>
@@ -297,7 +297,7 @@ const ProductsPage: React.FC = () => {
               <button className="modal-close" onClick={() => setShowStockModal(false)}>✕</button>
             </div>
             <div className="modal-body">
-              <div style={{ background: 'var(--bg-primary)', borderRadius: 8, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Current Stock</span>
                 <strong style={{ fontSize: 20 }}>{stockProduct.currentStock} units</strong>
               </div>
@@ -344,9 +344,9 @@ const ProductsPage: React.FC = () => {
               </div>
 
               {stockForm.quantity && parseInt(stockForm.quantity) > 0 && (
-                <div style={{ background: 'var(--bg-primary)', borderRadius: 8, padding: '10px 16px', fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Stock after update</span>
-                  <strong style={{ color: stockForm.type === 'IN' ? 'var(--success)' : 'var(--danger)' }}>
+                <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '10px 16px', fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-3)' }}>Stock after update</span>
+                  <strong style={{ color: stockForm.type === 'IN' ? 'var(--green)' : 'var(--red)' }}>
                     {stockForm.type === 'IN'
                       ? stockProduct.currentStock + parseInt(stockForm.quantity)
                       : stockProduct.currentStock - parseInt(stockForm.quantity)} units

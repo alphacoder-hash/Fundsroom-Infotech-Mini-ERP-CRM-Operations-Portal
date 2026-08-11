@@ -18,7 +18,7 @@ const navItems = [
 ];
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
-  '/dashboard': { title: 'Dashboard', subtitle: 'Overview of your business' },
+  '/dashboard': { title: 'Dashboard', subtitle: 'Overview of your business operations' },
   '/customers': { title: 'Customer CRM', subtitle: 'Manage your customer relationships' },
   '/products': { title: 'Products & Inventory', subtitle: 'Manage stock and product catalog' },
   '/challans': { title: 'Sales Challans', subtitle: 'Create and manage challans' },
@@ -30,7 +30,6 @@ const Layout: React.FC = () => {
   const location = useLocation();
 
   const currentPage = pageTitles[location.pathname] || { title: 'Portal', subtitle: '' };
-
   const handleLogout = () => { logout(); navigate('/login'); };
 
   return (
@@ -41,13 +40,14 @@ const Layout: React.FC = () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <div className="sidebar-logo-text">
-            <h1>Fundsroom ERP</h1>
-            <span>Operations Portal</span>
+            <h1>Fundsroom</h1>
+            <span>ERP · Operations Portal</span>
           </div>
         </div>
+
         <nav className="sidebar-nav">
           <div className="nav-section">
-            <div className="nav-section-title">Navigation</div>
+            <div className="nav-section-title">General</div>
             {navItems.map((item) => (
               <button
                 key={item.path}
@@ -59,7 +59,15 @@ const Layout: React.FC = () => {
               </button>
             ))}
           </div>
+          <div className="nav-section">
+            <div className="nav-section-title">Account</div>
+            <button className="nav-item" onClick={handleLogout}>
+              {icons.logout}
+              Logout
+            </button>
+          </div>
         </nav>
+
         <div className="sidebar-footer">
           <div className="user-card" onClick={handleLogout} title="Click to logout">
             <div className="user-avatar">{user?.email?.[0]?.toUpperCase()}</div>
@@ -67,18 +75,21 @@ const Layout: React.FC = () => {
               <div className="user-name">{user?.email?.split('@')[0]}</div>
               <div className="user-role">{user?.role?.toLowerCase()}</div>
             </div>
-            <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>{icons.logout}</span>
           </div>
         </div>
       </aside>
+
       <div className="main-content">
         <header className="topbar">
           <div>
             <div className="topbar-title">{currentPage.title}</div>
             <div className="topbar-subtitle">{currentPage.subtitle}</div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span className="badge badge-info">{user?.role}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className="badge badge-info" style={{ fontSize: 11 }}>{user?.role}</span>
+            <div className="user-avatar" style={{ width: 32, height: 32, fontSize: 12, borderRadius: 8 }}>
+              {user?.email?.[0]?.toUpperCase()}
+            </div>
           </div>
         </header>
         <main className="page-content">
