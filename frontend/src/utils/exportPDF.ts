@@ -90,7 +90,7 @@ export async function exportChallanPDF(challan: any) {
   text('Fundsroom Infotech - ERP/CRM Portal', width - margin - 210, margin + 16, 8, regular, MUTED);
 
   const bytes = await doc.save();
-  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const blob = new Blob([bytes as any], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
