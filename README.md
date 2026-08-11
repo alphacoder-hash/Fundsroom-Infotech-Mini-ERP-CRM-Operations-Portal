@@ -404,12 +404,23 @@ Import it into Postman and set the `base_url` variable to `http://localhost:5000
 
 ---
 
+## Bonus Features
+
+| Feature | Status | Details |
+|---|---|---|
+| Docker setup | ✅ Done | Multi-stage `Dockerfile` in `backend/` |
+| GitHub Actions CI/CD | ✅ Done | `.github/workflows/deploy.yml` — auto deploy on push to main |
+| Export invoice as PDF | ✅ Done | A4 PDF generated via `pdf-lib` on Challan Detail page |
+| Upload product image to AWS S3 | ✅ Done | S3 bucket `fundsroom-products` in `eu-north-1` |
+
+---
+
 ## Known Limitations
 
 - Purchase Orders module not yet implemented
-- Invoice generation not yet implemented
-- Input validation uses manual checks; Zod schema validation not yet wired up
+- Input validation uses manual checks — Zod schema validation not yet wired up
 - No refresh token — JWT expires after 24h and user must log in again
+- Challan cancellation does not restore stock (business decision — can be changed)
 
 ---
 
@@ -419,3 +430,18 @@ Import it into Postman and set the `base_url` variable to `http://localhost:5000
 - Challan cancellation does not restore stock (business decision — can be changed)
 - Product prices on challan are snapshotted at creation time, not live prices
 - GST number is optional for all customer types
+
+---
+
+## Submission Checklist
+
+| Requirement | Status |
+|---|---|
+| GitHub repository | ✅ https://github.com/alphacoder-hash/Fundsroom-Infotech-Mini-ERP-CRM-Operations-Portal |
+| Live frontend URL | ✅ https://fundsroom-infotech-mini-erp-crm-operations-portal-p45dxff9p.vercel.app |
+| Live backend API URL | ✅ https://fundsroom-backend-9cqq.onrender.com |
+| Test credentials for all roles | ✅ See Test Credentials section above |
+| Postman collection | ✅ `Fundsroom-ERP-CRM.postman_collection.json` at repo root |
+| README with setup + deployment | ✅ This file |
+| Architecture explanation | ✅ See Architecture section above |
+| Known limitations | ✅ See Known Limitations section above |
