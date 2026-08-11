@@ -190,7 +190,7 @@ export const updateChallanStatus = async (req: AuthRequest, res: Response): Prom
     const updated = await prisma.$transaction(async (tx) => {
       if (status === 'CONFIRMED') {
         for (const item of challan.items) {
-          const product = await tx.product.findUnique({ where: { id: item.productId } });
+          const product = await tx.product.findUnique({ where: { id: item.productId } }) as { id: string; name: string; currentStock: number } | null;
           if (!product) throw new Error(`Product "${item.productNameSnapshot}" no longer exists`);
           if (product.currentStock < item.quantity) {
             throw new Error(`Insufficient stock for "${item.productNameSnapshot}". Available: ${product.currentStock}, Required: ${item.quantity}`);
