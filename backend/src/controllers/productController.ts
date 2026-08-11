@@ -5,9 +5,12 @@ import { AuthRequest } from '../middleware/auth';
 // GET /products
 export const getProducts = async (req: AuthRequest, res: Response): Promise<void> => {
   const { search, category, page = '1', limit = '10' } = req.query;
-  const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
-  const where: any = {};
 
+  const pageNum = Math.max(1, parseInt(page as string) || 1);
+  const limitNum = Math.min(200, Math.max(1, parseInt(limit as string) || 10));
+  const skip = (pageNum - 1) * limitNum;
+
+  const where: any = {};
   if (search) {
     where.OR = [
       { name: { contains: search as string, mode: 'insensitive' } },
@@ -18,10 +21,10 @@ export const getProducts = async (req: AuthRequest, res: Response): Promise<void
 
   try {
     const [products, total] = await Promise.all([
-      prisma.product.findMany({ where, skip, take: parseInt(limit as string), orderBy: { createdAt: 'desc' } }),
+      prisma.product.findMany({ where, skip, take: limitNum, orderBy: { createdAt: 'desc' } }),
       prisma.product.count({ where }),
     ]);
-    res.json({ success: true, data: products, meta: { total, page: parseInt(page as string), limit: parseInt(limit as string) } });
+    res.json({ success: true, data: products, meta: { total, page: pageNum, limit: limitNum } });
   } catch {
     res.status(500).json({ success: false, message: 'Server error' });
   }

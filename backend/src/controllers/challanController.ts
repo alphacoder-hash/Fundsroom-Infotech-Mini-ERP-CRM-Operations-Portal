@@ -13,17 +13,23 @@ const generateChallanNumber = async (): Promise<string> => {
   return `CH-${year}-${String(lastNum + 1).padStart(5, '0')}`;
 };
 
+const VALID_CHALLAN_STATUSES = ['DRAFT', 'CONFIRMED', 'CANCELLED'];
+
 // GET /challans
 export const getChallans = async (req: AuthRequest, res: Response): Promise<void> => {
   const { status, customerId, page = '1', limit = '10' } = req.query;
-  const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+  const pageNum = Math.max(1, parseInt(page as string) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 10));
+  const skip = (pageNum - 1) * limitNum;
+
   const where: any = {};
-  if (status) where.status = status;
+  if (status && VALID_CHALLAN_STATUSES.includes(status as string)) where.status = status;
   if (customerId) where.customerId = customerId;
   try {
     const [challans, total] = await Promise.all([
       prisma.salesChallan.findMany({
-        where, skip, take: parseInt(limit as string), orderBy: { createdAt: 'desc' },
+        where, skip, take: limitNum, orderBy: { createdAt: 'desc' },
         include: {
           customer: { select: { name: true, businessName: true } },
           user: { select: { email: true } },
@@ -32,7 +38,7 @@ export const getChallans = async (req: AuthRequest, res: Response): Promise<void
       }),
       prisma.salesChallan.count({ where }),
     ]);
-    res.json({ success: true, data: challans, meta: { total, page: parseInt(page as string), limit: parseInt(limit as string) } });
+    res.json({ success: true, data: challans, meta: { total, page: pageNum, limit: limitNum } });
   } catch {
     res.status(500).json({ success: false, message: 'Server error' });
   }

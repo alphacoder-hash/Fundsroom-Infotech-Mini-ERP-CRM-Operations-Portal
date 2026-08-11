@@ -195,6 +195,7 @@ Frontend runs on: `http://localhost:5173`
 | `DATABASE_URL` | PostgreSQL connection string       | `postgresql://user:pass@host/db` |
 | `JWT_SECRET`   | Secret key for signing JWT tokens  | `your_secret_key`              |
 | `PORT`         | Port for the Express server        | `5000`                         |
+| `CORS_ORIGIN`  | Allowed frontend origin            | `http://localhost:5173`        |
 
 ### Frontend (`frontend/.env`)
 
