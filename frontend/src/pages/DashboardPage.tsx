@@ -192,6 +192,101 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* How to use guide */}
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="card-header">
+          <div>
+            <div className="card-title">📖 How to Use This Portal</div>
+            <div className="card-subtitle">A quick guide to all modules — follow the steps below to get started</div>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 12 }}>
+          {[
+            {
+              step: '01', color: '#4f46e5', bg: '#eef2ff', border: '#c7d2fe',
+              title: 'Customer CRM',
+              path: '/app/customers',
+              items: [
+                'Go to Customers in the sidebar',
+                'Click "Add Customer" to create a new lead or client',
+                'Search by name, mobile, or business name',
+                'Filter by status: Lead / Active / Inactive',
+                'Click "View" to open the detail page',
+                'Add timestamped follow-up notes on the detail page',
+              ],
+            },
+            {
+              step: '02', color: '#10b981', bg: '#ecfdf5', border: '#6ee7b7',
+              title: 'Products & Inventory',
+              path: '/app/products',
+              items: [
+                'Go to Products in the sidebar',
+                'Click "Add Product" to add SKU, price, stock, location',
+                'Use Stock IN to receive new inventory',
+                'Use Stock OUT to manually deduct stock',
+                'Products with ⚠️ badge are below minimum stock',
+                'Click the history icon to view full stock movement log',
+              ],
+            },
+            {
+              step: '03', color: '#f59e0b', bg: '#fffbeb', border: '#fcd34d',
+              title: 'Sales Challans',
+              path: '/app/challans',
+              items: [
+                'Go to Challans in the sidebar',
+                'Click "Create Challan" and select a customer',
+                'Add products and quantities — stock is checked live',
+                'Save as Draft (no stock change) or Confirmed (deducts stock)',
+                'Open a challan to Confirm or Cancel it',
+                'Click "Export PDF" to download an A4 invoice',
+              ],
+            },
+            {
+              step: '04', color: '#8b5cf6', bg: '#f5f3ff', border: '#c4b5fd',
+              title: 'Role-Based Access',
+              path: null,
+              items: [
+                'ADMIN — full access to all modules',
+                'SALES — manage customers and create challans',
+                'WAREHOUSE — manage products and stock movements',
+                'ACCOUNTS — view-only access across all modules',
+                'Buttons are hidden automatically based on your role',
+                'Use test credentials from the login page to switch roles',
+              ],
+            },
+          ].map(g => (
+            <div
+              key={g.step}
+              onClick={() => g.path && navigate(g.path)}
+              style={{
+                background: g.bg, border: `1px solid ${g.border}`,
+                borderRadius: 12, padding: '16px 18px',
+                cursor: g.path ? 'pointer' : 'default',
+                transition: 'all 0.15s',
+              }}
+              onMouseOver={e => { if (g.path) e.currentTarget.style.transform = 'translateY(-2px)'; }}
+              onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <span style={{
+                  width: 28, height: 28, borderRadius: 8,
+                  background: g.color, color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 800, flexShrink: 0,
+                }}>{g.step}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: g.color }}>{g.title}</span>
+                {g.path && <svg viewBox="0 0 24 24" fill="none" stroke={g.color} strokeWidth="2" style={{width:13,height:13,marginLeft:'auto',opacity:0.6}}><polyline points="9 18 15 12 9 6"/></svg>}
+              </div>
+              <ul style={{ paddingLeft: 16, margin: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {g.items.map(item => (
+                  <li key={item} style={{ fontSize: 12.5, color: 'var(--text-2)', lineHeight: 1.5 }}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
