@@ -3,3 +3,10 @@ node_modules
 .env
 
 /generated/prisma
+dist
+
+# Prisma auto-generated AI skill folders
+.claude
+.windsurf
+.agents
+skills-lock.json

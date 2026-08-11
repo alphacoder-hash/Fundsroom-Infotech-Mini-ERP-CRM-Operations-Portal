@@ -1,0 +1,233 @@
+{
+  "info": {
+    "name": "Fundsroom Mini ERP + CRM API",
+    "_postman_id": "fundsroom-erp-crm-2026",
+    "description": "API collection for the Fundsroom Infotech Mini ERP + CRM Operations Portal",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:5000/health", "host": ["localhost"], "port": "5000", "path": ["health"] }
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();", "if (res.data && res.data.token) {", "  pm.collectionVariables.set('token', res.data.token);", "  console.log('Token saved!');", "}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@fundsroom.com\",\n  \"password\": \"Admin@123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Sales",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();", "if (res.data && res.data.token) { pm.collectionVariables.set('token', res.data.token); }"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"sales@fundsroom.com\",\n  \"password\": \"Admin@123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Warehouse",
+          "event": [{ "listen": "test", "script": { "exec": ["const res = pm.response.json();", "if (res.data && res.data.token) { pm.collectionVariables.set('token', res.data.token); }"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"warehouse@fundsroom.com\",\n  \"password\": \"Admin@123\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customers?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["customers"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Search Customers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customers?search=Shah", "host": ["{{baseUrl}}"], "path": ["customers"], "query": [{ "key": "search", "value": "Shah" }] }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/customers/demo-customer-001", "host": ["{{baseUrl}}"], "path": ["customers", "demo-customer-001"] }
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Suresh Mehta\",\n  \"mobile\": \"9812345678\",\n  \"email\": \"suresh@example.com\",\n  \"businessName\": \"Mehta Distributors\",\n  \"gstNumber\": \"27AABCM1234A1Z5\",\n  \"type\": \"DISTRIBUTOR\",\n  \"address\": \"Pune, Maharashtra\",\n  \"status\": \"ACTIVE\",\n  \"followUpDate\": \"2026-09-01\",\n  \"notes\": \"Key distributor in Pune region\"\n}" },
+            "url": { "raw": "{{baseUrl}}/customers", "host": ["{{baseUrl}}"], "path": ["customers"] }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Ramesh Shah Updated\",\n  \"mobile\": \"9876543210\",\n  \"type\": \"WHOLESALE\",\n  \"status\": \"ACTIVE\"\n}" },
+            "url": { "raw": "{{baseUrl}}/customers/demo-customer-001", "host": ["{{baseUrl}}"], "path": ["customers", "demo-customer-001"] }
+          }
+        },
+        {
+          "name": "Add Follow-up Note",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"note\": \"Called customer. Interested in bulk order of Product A next month.\"\n}" },
+            "url": { "raw": "{{baseUrl}}/customers/demo-customer-001/notes", "host": ["{{baseUrl}}"], "path": ["customers", "demo-customer-001", "notes"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products & Inventory",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/products?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/products?search=Widget", "host": ["{{baseUrl}}"], "path": ["products"], "query": [{ "key": "search", "value": "Widget" }] }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/products/:id", "host": ["{{baseUrl}}"], "path": ["products", ":id"], "variable": [{ "key": "id", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Steel Pipe 1 inch\",\n  \"sku\": \"STEEL-PIPE-001\",\n  \"category\": \"Hardware\",\n  \"unitPrice\": 250.00,\n  \"currentStock\": 500,\n  \"minStockAlert\": 50,\n  \"location\": \"Warehouse A, Rack 3\"\n}" },
+            "url": { "raw": "{{baseUrl}}/products", "host": ["{{baseUrl}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Stock IN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 50,\n  \"type\": \"IN\",\n  \"reason\": \"Purchase order received from supplier\"\n}" },
+            "url": { "raw": "{{baseUrl}}/products/:id/stock", "host": ["{{baseUrl}}"], "path": ["products", ":id", "stock"], "variable": [{ "key": "id", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        },
+        {
+          "name": "Stock OUT",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 10,\n  \"type\": \"OUT\",\n  \"reason\": \"Manual adjustment\"\n}" },
+            "url": { "raw": "{{baseUrl}}/products/:id/stock", "host": ["{{baseUrl}}"], "path": ["products", ":id", "stock"], "variable": [{ "key": "id", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        },
+        {
+          "name": "Get Stock Movements",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/products/:id/movements", "host": ["{{baseUrl}}"], "path": ["products", ":id", "movements"], "variable": [{ "key": "id", "value": "REPLACE_WITH_PRODUCT_ID" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sales Challans",
+      "item": [
+        {
+          "name": "Get All Challans",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/challans?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["challans"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Create Challan (Draft)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerId\": \"demo-customer-001\",\n  \"status\": \"DRAFT\",\n  \"items\": [\n    { \"productId\": \"REPLACE_WITH_PRODUCT_ID\", \"quantity\": 5 },\n    { \"productId\": \"REPLACE_WITH_PRODUCT_ID_2\", \"quantity\": 3 }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/challans", "host": ["{{baseUrl}}"], "path": ["challans"] }
+          }
+        },
+        {
+          "name": "Create Challan (Confirmed - Deducts Stock)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerId\": \"demo-customer-001\",\n  \"status\": \"CONFIRMED\",\n  \"items\": [\n    { \"productId\": \"REPLACE_WITH_PRODUCT_ID\", \"quantity\": 2 }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/challans", "host": ["{{baseUrl}}"], "path": ["challans"] }
+          }
+        },
+        {
+          "name": "Confirm Draft Challan",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\"\n}" },
+            "url": { "raw": "{{baseUrl}}/challans/:id/status", "host": ["{{baseUrl}}"], "path": ["challans", ":id", "status"], "variable": [{ "key": "id", "value": "REPLACE_WITH_CHALLAN_ID" }] }
+          }
+        },
+        {
+          "name": "Cancel Challan",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CANCELLED\"\n}" },
+            "url": { "raw": "{{baseUrl}}/challans/:id/status", "host": ["{{baseUrl}}"], "path": ["challans", ":id", "status"], "variable": [{ "key": "id", "value": "REPLACE_WITH_CHALLAN_ID" }] }
+          }
+        }
+      ]
+    }
+  ]
+}
