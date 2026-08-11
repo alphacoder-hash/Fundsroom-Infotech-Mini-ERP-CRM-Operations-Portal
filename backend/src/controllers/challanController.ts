@@ -3,9 +3,14 @@ import prisma from '../prismaClient';
 import { AuthRequest } from '../middleware/auth';
 
 const generateChallanNumber = async (): Promise<string> => {
-  const count = await prisma.salesChallan.count();
-  const num = String(count + 1).padStart(5, '0');
-  return `CH-${new Date().getFullYear()}-${num}`;
+  const year = new Date().getFullYear();
+  // Use max challanNumber to avoid collision on deletions
+  const last = await prisma.salesChallan.findFirst({
+    where: { challanNumber: { startsWith: `CH-${year}-` } },
+    orderBy: { challanNumber: 'desc' },
+  });
+  const lastNum = last ? parseInt(last.challanNumber.split('-')[2]) : 0;
+  return `CH-${year}-${String(lastNum + 1).padStart(5, '0')}`;
 };
 
 // GET /challans
@@ -19,7 +24,11 @@ export const getChallans = async (req: AuthRequest, res: Response): Promise<void
     const [challans, total] = await Promise.all([
       prisma.salesChallan.findMany({
         where, skip, take: parseInt(limit as string), orderBy: { createdAt: 'desc' },
-        include: { customer: { select: { name: true, businessName: true } }, user: { select: { email: true } }, items: true },
+        include: {
+          customer: { select: { name: true, businessName: true } },
+          user: { select: { email: true } },
+          items: true,
+        },
       }),
       prisma.salesChallan.count({ where }),
     ]);
@@ -34,7 +43,11 @@ export const getChallan = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const challan = await prisma.salesChallan.findUnique({
       where: { id: req.params.id },
-      include: { customer: true, user: { select: { email: true, role: true } }, items: { include: { product: { select: { name: true, sku: true } } } } },
+      include: {
+        customer: true,
+        user: { select: { email: true, role: true } },
+        items: { include: { product: { select: { name: true, sku: true } } } },
+      },
     });
     if (!challan) { res.status(404).json({ success: false, message: 'Challan not found' }); return; }
     res.json({ success: true, data: challan });
@@ -45,27 +58,53 @@ export const getChallan = async (req: AuthRequest, res: Response): Promise<void>
 
 // POST /challans
 export const createChallan = async (req: AuthRequest, res: Response): Promise<void> => {
-  const { customerId, items, status = 'DRAFT' } = req.body;
-  if (!customerId || !items || !Array.isArray(items) || items.length === 0) {
-    res.status(400).json({ success: false, message: 'Customer and at least one item are required' });
-    return;
+  const { customerId, items, status } = req.body;
+
+  // --- Validate inputs ---
+  if (!customerId || !customerId.trim()) {
+    res.status(400).json({ success: false, message: 'Customer is required' }); return;
   }
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    res.status(400).json({ success: false, message: 'At least one product item is required' }); return;
+  }
+
+  const challanStatus = status === 'CONFIRMED' ? 'CONFIRMED' : 'DRAFT';
+
+  for (const item of items) {
+    if (!item.productId || !item.productId.trim()) {
+      res.status(400).json({ success: false, message: 'Each item must have a valid product selected' }); return;
+    }
+    const qty = parseInt(item.quantity);
+    if (!qty || qty <= 0) {
+      res.status(400).json({ success: false, message: 'Each item quantity must be a positive number' }); return;
+    }
+  }
+
+  // Check for duplicate productIds in items
+  const productIds = items.map((i: any) => i.productId);
+  const uniqueIds = new Set(productIds);
+  if (uniqueIds.size !== productIds.length) {
+    res.status(400).json({ success: false, message: 'Duplicate products in challan — combine quantities instead' }); return;
+  }
+
   try {
-    // Validate customer
     const customer = await prisma.customer.findUnique({ where: { id: customerId } });
     if (!customer) { res.status(404).json({ success: false, message: 'Customer not found' }); return; }
 
-    // Fetch products and validate stock if confirming
-    const productIds = items.map((i: any) => i.productId);
     const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
     const productMap = new Map(products.map(p => [p.id, p]));
 
+    // Validate all products exist and check stock if confirming
     for (const item of items) {
       const product = productMap.get(item.productId);
-      if (!product) { res.status(404).json({ success: false, message: `Product ${item.productId} not found` }); return; }
-      if (status === 'CONFIRMED' && product.currentStock < item.quantity) {
-        res.status(400).json({ success: false, message: `Insufficient stock for "${product.name}". Available: ${product.currentStock}, Requested: ${item.quantity}` });
-        return;
+      if (!product) {
+        res.status(404).json({ success: false, message: `Product not found` }); return;
+      }
+      if (challanStatus === 'CONFIRMED' && product.currentStock < parseInt(item.quantity)) {
+        res.status(400).json({
+          success: false,
+          message: `Insufficient stock for "${product.name}". Available: ${product.currentStock}, Requested: ${parseInt(item.quantity)}`,
+        }); return;
       }
     }
 
@@ -78,7 +117,7 @@ export const createChallan = async (req: AuthRequest, res: Response): Promise<vo
           challanNumber,
           customerId,
           totalQuantity,
-          status,
+          status: challanStatus,
           createdBy: req.user!.id,
           items: {
             create: items.map((item: any) => {
@@ -96,8 +135,7 @@ export const createChallan = async (req: AuthRequest, res: Response): Promise<vo
         include: { items: true, customer: true },
       });
 
-      // Deduct stock if confirmed
-      if (status === 'CONFIRMED') {
+      if (challanStatus === 'CONFIRMED') {
         for (const item of items) {
           const product = productMap.get(item.productId)!;
           await tx.product.update({
@@ -105,7 +143,13 @@ export const createChallan = async (req: AuthRequest, res: Response): Promise<vo
             data: { currentStock: product.currentStock - parseInt(item.quantity) },
           });
           await tx.stockMovement.create({
-            data: { productId: item.productId, quantityChanged: parseInt(item.quantity), type: 'OUT', reason: `Challan: ${challanNumber}`, createdBy: req.user!.id },
+            data: {
+              productId: item.productId,
+              quantityChanged: parseInt(item.quantity),
+              type: 'OUT',
+              reason: `Challan: ${challanNumber}`,
+              createdBy: req.user!.id,
+            },
           });
         }
       }
@@ -122,24 +166,42 @@ export const createChallan = async (req: AuthRequest, res: Response): Promise<vo
 // PATCH /challans/:id/status
 export const updateChallanStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   const { status } = req.body;
+
   if (!status || !['CONFIRMED', 'CANCELLED'].includes(status)) {
-    res.status(400).json({ success: false, message: 'Valid status (CONFIRMED/CANCELLED) is required' });
-    return;
+    res.status(400).json({ success: false, message: 'Status must be CONFIRMED or CANCELLED' }); return;
   }
+
   try {
-    const challan = await prisma.salesChallan.findUnique({ where: { id: req.params.id }, include: { items: true } });
+    const challan = await prisma.salesChallan.findUnique({
+      where: { id: req.params.id },
+      include: { items: true },
+    });
     if (!challan) { res.status(404).json({ success: false, message: 'Challan not found' }); return; }
-    if (challan.status !== 'DRAFT') { res.status(400).json({ success: false, message: 'Only DRAFT challans can be updated' }); return; }
+    if (challan.status !== 'DRAFT') {
+      res.status(400).json({ success: false, message: `Challan is already ${challan.status}. Only DRAFT challans can be updated` }); return;
+    }
 
     const updated = await prisma.$transaction(async (tx) => {
       if (status === 'CONFIRMED') {
         for (const item of challan.items) {
           const product = await tx.product.findUnique({ where: { id: item.productId } });
-          if (!product || product.currentStock < item.quantity) {
-            throw new Error(`Insufficient stock for product "${item.productNameSnapshot}"`);
+          if (!product) throw new Error(`Product "${item.productNameSnapshot}" no longer exists`);
+          if (product.currentStock < item.quantity) {
+            throw new Error(`Insufficient stock for "${item.productNameSnapshot}". Available: ${product.currentStock}, Required: ${item.quantity}`);
           }
-          await tx.product.update({ where: { id: item.productId }, data: { currentStock: product.currentStock - item.quantity } });
-          await tx.stockMovement.create({ data: { productId: item.productId, quantityChanged: item.quantity, type: 'OUT', reason: `Challan: ${challan.challanNumber}`, createdBy: req.user!.id } });
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { currentStock: product.currentStock - item.quantity },
+          });
+          await tx.stockMovement.create({
+            data: {
+              productId: item.productId,
+              quantityChanged: item.quantity,
+              type: 'OUT',
+              reason: `Challan: ${challan.challanNumber}`,
+              createdBy: req.user!.id,
+            },
+          });
         }
       }
       return tx.salesChallan.update({ where: { id: req.params.id }, data: { status } });
@@ -147,6 +209,6 @@ export const updateChallanStatus = async (req: AuthRequest, res: Response): Prom
 
     res.json({ success: true, data: updated });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message || 'Failed to update challan' });
+    res.status(400).json({ success: false, message: err.message || 'Failed to update challan status' });
   }
 };
