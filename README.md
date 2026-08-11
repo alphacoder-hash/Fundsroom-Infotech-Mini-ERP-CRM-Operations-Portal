@@ -8,7 +8,7 @@ A full-stack ERP/CRM system built for a wholesale/distribution company. Covers c
 
 | Service  | URL |
 |----------|-----|
-| Frontend | https://fundsroom-infotech-mini-erp-crm-operations-portal-p45dxff9p.vercel.app |
+| Frontend | https://fundsroom-infotech-mini-erp-crm-ope-five.vercel.app |
 | Backend API | https://fundsroom-backend-9cqq.onrender.com |
 | Database | Supabase PostgreSQL (hosted) |
 
@@ -438,7 +438,7 @@ Import it into Postman and set the `base_url` variable to `http://localhost:5000
 | Requirement | Status |
 |---|---|
 | GitHub repository | ✅ https://github.com/alphacoder-hash/Fundsroom-Infotech-Mini-ERP-CRM-Operations-Portal |
-| Live frontend URL | ✅ https://fundsroom-infotech-mini-erp-crm-operations-portal-p45dxff9p.vercel.app |
+| Live frontend URL | ✅ https://fundsroom-infotech-mini-erp-crm-ope-five.vercel.app |
 | Live backend API URL | ✅ https://fundsroom-backend-9cqq.onrender.com |
 | Test credentials for all roles | ✅ See Test Credentials section above |
 | Postman collection | ✅ `Fundsroom-ERP-CRM.postman_collection.json` at repo root |
