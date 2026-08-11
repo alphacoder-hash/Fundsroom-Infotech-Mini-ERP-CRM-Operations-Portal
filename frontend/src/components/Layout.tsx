@@ -28,13 +28,18 @@ const Layout: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const currentPage = pageTitles[location.pathname] || { title: 'Portal', subtitle: '' };
   const handleLogout = () => { logout(); navigate('/'); };
 
   return (
     <div className="layout">
-      <aside className="sidebar">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+      <aside className={`sidebar${sidebarOpen ? ' sidebar-open' : ''}`}>
         <div className="sidebar-logo">
           <div className="sidebar-logo-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -52,7 +57,7 @@ const Layout: React.FC = () => {
               <button
                 key={item.path}
                 className={`nav-item ${location.pathname.startsWith(item.path) ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
+                onClick={() => { navigate(item.path); setSidebarOpen(false); }}
               >
                 {item.icon}
                 {item.label}
@@ -81,9 +86,14 @@ const Layout: React.FC = () => {
 
       <div className="main-content">
         <header className="topbar">
-          <div>
-            <div className="topbar-title">{currentPage.title}</div>
-            <div className="topbar-subtitle">{currentPage.subtitle}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button className="hamburger" onClick={() => setSidebarOpen(o => !o)} aria-label="Toggle menu">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div>
+              <div className="topbar-title">{currentPage.title}</div>
+              <div className="topbar-subtitle">{currentPage.subtitle}</div>
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span className="badge badge-info" style={{ fontSize: 11 }}>{user?.role}</span>

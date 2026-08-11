@@ -93,7 +93,7 @@ const CustomerDetailPage: React.FC = () => {
 
   return (
     <div>
-      <button className="back-btn" onClick={() => navigate('/customers')}>
+      <button className="back-btn" onClick={() => navigate('/app/customers')}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
         Back to Customers
       </button>
