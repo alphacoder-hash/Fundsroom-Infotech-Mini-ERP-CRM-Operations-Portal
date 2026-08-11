@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../config';
 import { useAuth } from '../context/AuthContext';
 
@@ -20,6 +20,10 @@ const ProductsPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [showStockModal, setShowStockModal] = useState(false);
   const [stockProduct, setStockProduct] = useState<any>(null);
@@ -44,7 +48,6 @@ const ProductsPage: React.FC = () => {
 
   useEffect(() => { fetchProducts(1); }, [fetchProducts]);
 
-  // --- Validation ---
   const validateForm = () => {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = 'Product name is required';
@@ -52,9 +55,7 @@ const ProductsPage: React.FC = () => {
     if (!form.category.trim()) e.category = 'Category is required';
     if (!form.unitPrice) e.unitPrice = 'Unit price is required';
     else if (parseFloat(form.unitPrice) <= 0) e.unitPrice = 'Unit price must be greater than 0';
-    if (!editProduct) {
-      if (form.currentStock !== '' && parseInt(form.currentStock) < 0) e.currentStock = 'Stock cannot be negative';
-    }
+    if (!editProduct && form.currentStock !== '' && parseInt(form.currentStock) < 0) e.currentStock = 'Stock cannot be negative';
     if (form.minStockAlert !== '' && parseInt(form.minStockAlert) < 0) e.minStockAlert = 'Cannot be negative';
     setFormErrors(e);
     return Object.keys(e).length === 0;
@@ -69,11 +70,12 @@ const ProductsPage: React.FC = () => {
     return true;
   };
 
-  // --- Product Modal ---
   const openAdd = () => {
     setEditProduct(null);
     setForm(initialForm);
     setFormErrors({});
+    setImageFile(null);
+    setImagePreview('');
     setShowModal(true);
   };
 
@@ -81,29 +83,50 @@ const ProductsPage: React.FC = () => {
     setEditProduct(p);
     setForm({ name: p.name, sku: p.sku, category: p.category, unitPrice: p.unitPrice, currentStock: p.currentStock, minStockAlert: p.minStockAlert, location: p.location || '' });
     setFormErrors({});
+    setImageFile(null);
+    setImagePreview(p.imageUrl || '');
     setShowModal(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSave = async () => {
     if (!validateForm()) return;
     setSaving(true);
     try {
+      let savedId: string;
       if (editProduct) {
         await api.put(`/products/${editProduct.id}`, {
           name: form.name, sku: form.sku, category: form.category,
           unitPrice: form.unitPrice, minStockAlert: form.minStockAlert, location: form.location,
         });
+        savedId = editProduct.id;
       } else {
-        await api.post('/products', form);
+        const res = await api.post('/products', form);
+        savedId = res.data.data.id;
+      }
+      if (imageFile) {
+        setUploadingImage(true);
+        const fd = new FormData();
+        fd.append('image', imageFile);
+        await api.post(`/products/${savedId}/image`, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        setUploadingImage(false);
       }
       setShowModal(false);
       fetchProducts(1);
     } catch (err: any) {
       setFormErrors({ submit: err.response?.data?.message || 'Failed to save product' });
+      setUploadingImage(false);
     } finally { setSaving(false); }
   };
 
-  // --- Stock Modal ---
   const openStock = (p: any) => {
     setStockProduct(p);
     setStockForm(initialStock);
@@ -123,7 +146,6 @@ const ProductsPage: React.FC = () => {
     } finally { setSaving(false); }
   };
 
-  // --- Movements Modal ---
   const openMovements = async (p: any) => {
     setMovementsProduct(p);
     setShowMovements(true);
@@ -156,13 +178,7 @@ const ProductsPage: React.FC = () => {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input className="search-input" placeholder="Search name or SKU..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <input
-            className="form-input"
-            style={{ width: 180 }}
-            placeholder="Filter by category..."
-            value={categoryFilter}
-            onChange={e => setCategoryFilter(e.target.value)}
-          />
+          <input className="form-input" style={{ width: 180 }} placeholder="Filter by category..." value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} />
         </div>
 
         {loading ? <div className="loading-overlay"><div className="spinner" /></div> : (
@@ -170,7 +186,7 @@ const ProductsPage: React.FC = () => {
             <div className="table-wrapper">
               <table>
                 <thead>
-                  <tr><th>Product</th><th>SKU</th><th>Category</th><th>Unit Price</th><th>Stock</th><th>Min Alert</th><th>Location</th><th>Actions</th></tr>
+                  <tr><th>Image</th><th>Product</th><th>SKU</th><th>Category</th><th>Unit Price</th><th>Stock</th><th>Location</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {products.length === 0 ? (
@@ -183,6 +199,14 @@ const ProductsPage: React.FC = () => {
                     </td></tr>
                   ) : products.map(p => (
                     <tr key={p.id}>
+                      <td>
+                        {p.imageUrl
+                          ? <img src={p.imageUrl} alt={p.name} style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }} />
+                          : <div style={{ width: 40, height: 40, borderRadius: 6, background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-4)" strokeWidth="1.5" style={{ width: 18, height: 18 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                        }
+                      </td>
                       <td><strong>{p.name}</strong></td>
                       <td><code style={{ background: 'var(--surface-2)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>{p.sku}</code></td>
                       <td>{p.category}</td>
@@ -192,8 +216,7 @@ const ProductsPage: React.FC = () => {
                           {p.currentStock} {p.currentStock <= p.minStockAlert && '⚠️'}
                         </span>
                       </td>
-                      <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.minStockAlert}</td>
-                      <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.location || '—'}</td>
+                      <td style={{ fontSize: 12, color: 'var(--text-3)' }}>{p.location || '—'}</td>
                       <td>
                         <div style={{ display: 'flex', gap: 6 }}>
                           {canEdit && <button className="btn btn-sm btn-secondary" onClick={() => openStock(p)}>Stock</button>}
@@ -228,10 +251,40 @@ const ProductsPage: React.FC = () => {
             </div>
             <div className="modal-body">
               {formErrors.submit && (
-                <div className="form-error" style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--danger-light)', borderRadius: 6 }}>
-                  {formErrors.submit}
-                </div>
+                <div className="banner banner-danger" style={{ marginBottom: 14 }}>{formErrors.submit}</div>
               )}
+
+              {/* Image upload */}
+              <div className="form-group">
+                <label className="form-label">Product Image</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{
+                      width: 72, height: 72, borderRadius: 10, border: '2px dashed var(--border)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', overflow: 'hidden', flexShrink: 0, background: 'var(--surface-2)',
+                      transition: 'border-color 0.15s',
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.borderColor = 'var(--indigo)')}
+                    onMouseOut={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+                  >
+                    {imagePreview
+                      ? <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-4)" strokeWidth="1.5" style={{ width: 24, height: 24 }}><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    }
+                  </div>
+                  <div>
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => fileInputRef.current?.click()}>
+                      {imagePreview ? 'Change Image' : 'Upload Image'}
+                    </button>
+                    <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 5 }}>JPEG, PNG or WebP · Max 5MB</div>
+                    {imageFile && <div style={{ fontSize: 11, color: 'var(--green)', marginTop: 3 }}>✓ {imageFile.name}</div>}
+                  </div>
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handleImageChange} />
+              </div>
+
               <div className="form-grid">
                 <div className="form-group">
                   <label className="form-label">Product Name *</label>
@@ -253,8 +306,6 @@ const ProductsPage: React.FC = () => {
                   <input className={`form-input ${formErrors.unitPrice ? 'input-error' : ''}`} type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => f('unitPrice', e.target.value)} placeholder="0.00" />
                   {formErrors.unitPrice && <div className="form-error">{formErrors.unitPrice}</div>}
                 </div>
-
-                {/* currentStock only shown on Add, locked on Edit */}
                 {!editProduct ? (
                   <div className="form-group">
                     <label className="form-label">Opening Stock</label>
@@ -265,10 +316,9 @@ const ProductsPage: React.FC = () => {
                   <div className="form-group">
                     <label className="form-label">Current Stock</label>
                     <input className="form-input" value={form.currentStock} disabled style={{ opacity: 0.5, cursor: 'not-allowed' }} />
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Use Stock IN/OUT to change stock</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 4 }}>Use Stock IN/OUT to change stock</div>
                   </div>
                 )}
-
                 <div className="form-group">
                   <label className="form-label">Min Stock Alert</label>
                   <input className={`form-input ${formErrors.minStockAlert ? 'input-error' : ''}`} type="number" min="0" value={form.minStockAlert} onChange={e => f('minStockAlert', e.target.value)} placeholder="0" />
@@ -282,7 +332,9 @@ const ProductsPage: React.FC = () => {
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save Product'}</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving || uploadingImage}>
+                {uploadingImage ? 'Uploading image…' : saving ? 'Saving…' : 'Save Product'}
+              </button>
             </div>
           </div>
         </div>
@@ -298,26 +350,17 @@ const ProductsPage: React.FC = () => {
             </div>
             <div className="modal-body">
               <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Current Stock</span>
+                <span style={{ color: 'var(--text-3)', fontSize: 13 }}>Current Stock</span>
                 <strong style={{ fontSize: 20 }}>{stockProduct.currentStock} units</strong>
               </div>
-
-              {stockError && (
-                <div className="form-error" style={{ marginBottom: 12, padding: '8px 12px', background: 'var(--danger-light)', borderRadius: 6 }}>
-                  {stockError}
-                </div>
-              )}
-
+              {stockError && <div className="banner banner-danger" style={{ marginBottom: 12 }}>{stockError}</div>}
               <div className="form-group">
                 <label className="form-label">Movement Type *</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                   {(['IN', 'OUT'] as const).map(t => (
-                    <button
-                      key={t}
-                      onClick={() => setStockForm(s => ({ ...s, type: t }))}
+                    <button key={t} onClick={() => setStockForm(s => ({ ...s, type: t }))}
                       className={`btn ${stockForm.type === t ? (t === 'IN' ? 'btn-success' : 'btn-danger') : 'btn-secondary'}`}
-                      style={{ justifyContent: 'center' }}
-                    >
+                      style={{ justifyContent: 'center' }}>
                       {t === 'IN' ? '↑ Stock IN' : '↓ Stock OUT'}
                     </button>
                   ))}
@@ -325,24 +368,15 @@ const ProductsPage: React.FC = () => {
               </div>
               <div className="form-group">
                 <label className="form-label">Quantity *</label>
-                <input
-                  className={`form-input ${stockError && !stockForm.quantity ? 'input-error' : ''}`}
-                  type="number" min="1"
-                  value={stockForm.quantity}
-                  onChange={e => setStockForm(s => ({ ...s, quantity: e.target.value }))}
-                  placeholder="Enter quantity"
-                />
+                <input className="form-input" type="number" min="1" value={stockForm.quantity}
+                  onChange={e => setStockForm(s => ({ ...s, quantity: e.target.value }))} placeholder="Enter quantity" />
               </div>
               <div className="form-group">
                 <label className="form-label">Reason</label>
-                <input
-                  className="form-input"
-                  value={stockForm.reason}
+                <input className="form-input" value={stockForm.reason}
                   onChange={e => setStockForm(s => ({ ...s, reason: e.target.value }))}
-                  placeholder="e.g. Purchase order received, Damaged goods"
-                />
+                  placeholder="e.g. Purchase order received" />
               </div>
-
               {stockForm.quantity && parseInt(stockForm.quantity) > 0 && (
                 <div style={{ background: 'var(--surface-2)', borderRadius: 8, padding: '10px 16px', fontSize: 13, display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-3)' }}>Stock after update</span>
@@ -356,12 +390,8 @@ const ProductsPage: React.FC = () => {
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowStockModal(false)}>Cancel</button>
-              <button
-                className={`btn ${stockForm.type === 'IN' ? 'btn-success' : 'btn-danger'}`}
-                onClick={handleStockUpdate}
-                disabled={saving}
-              >
-                {saving ? 'Updating...' : `${stockForm.type === 'IN' ? '↑ Add' : '↓ Remove'} Stock`}
+              <button className={`btn ${stockForm.type === 'IN' ? 'btn-success' : 'btn-danger'}`} onClick={handleStockUpdate} disabled={saving}>
+                {saving ? 'Updating…' : `${stockForm.type === 'IN' ? '↑ Add' : '↓ Remove'} Stock`}
               </button>
             </div>
           </div>
@@ -375,37 +405,28 @@ const ProductsPage: React.FC = () => {
             <div className="modal-header">
               <div>
                 <div className="modal-title">Stock Movement Log</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{movementsProduct.name} · SKU: {movementsProduct.sku}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-4)', marginTop: 2 }}>{movementsProduct.name} · SKU: {movementsProduct.sku}</div>
               </div>
               <button className="modal-close" onClick={() => setShowMovements(false)}>✕</button>
             </div>
             <div className="modal-body" style={{ padding: 0 }}>
               {movements.length === 0 ? (
-                <div className="empty-state" style={{ padding: 40 }}>
-                  <p>No stock movements yet</p>
-                </div>
+                <div className="empty-state" style={{ padding: 40 }}><p>No stock movements yet</p></div>
               ) : (
                 <div className="table-wrapper">
                   <table>
                     <thead>
-                      <tr>
-                        <th>Type</th>
-                        <th>Quantity Changed</th>
-                        <th>Reason</th>
-                        <th>Created By</th>
-                        <th>Role</th>
-                        <th>Timestamp</th>
-                      </tr>
+                      <tr><th>Type</th><th>Qty Changed</th><th>Reason</th><th>Created By</th><th>Role</th><th>Timestamp</th></tr>
                     </thead>
                     <tbody>
                       {movements.map((m: any) => (
                         <tr key={m.id}>
                           <td><span className={`badge ${m.type === 'IN' ? 'badge-success' : 'badge-danger'}`}>{m.type}</span></td>
-                          <td><strong style={{ color: m.type === 'IN' ? 'var(--success)' : 'var(--danger)' }}>{m.type === 'IN' ? '+' : '-'}{m.quantityChanged}</strong></td>
-                          <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.reason || '—'}</td>
+                          <td><strong style={{ color: m.type === 'IN' ? 'var(--green)' : 'var(--red)' }}>{m.type === 'IN' ? '+' : '-'}{m.quantityChanged}</strong></td>
+                          <td style={{ fontSize: 12, color: 'var(--text-3)' }}>{m.reason || '—'}</td>
                           <td style={{ fontSize: 12 }}>{m.user?.email || '—'}</td>
                           <td><span className="badge badge-default" style={{ fontSize: 10 }}>{m.user?.role || '—'}</span></td>
-                          <td style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{new Date(m.createdAt).toLocaleString()}</td>
+                          <td style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>{new Date(m.createdAt).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>

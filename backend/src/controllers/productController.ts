@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import prisma from '../prismaClient';
 import { AuthRequest } from '../middleware/auth';
+import { uploadToS3, deleteFromS3 } from '../s3';
 
 // GET /products
 export const getProducts = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -155,6 +156,36 @@ export const updateStock = async (req: AuthRequest, res: Response): Promise<void
     res.json({ success: true, data: { product: updatedProduct, movement } });
   } catch {
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// POST /products/:id/image
+export const uploadProductImage = async (req: AuthRequest, res: Response): Promise<void> => {
+  const file = (req as any).file;
+  if (!file) { res.status(400).json({ success: false, message: 'No image file provided' }); return; }
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowed.includes(file.mimetype)) {
+    res.status(400).json({ success: false, message: 'Only JPEG, PNG, or WebP images are allowed' });
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    res.status(400).json({ success: false, message: 'Image must be under 5MB' });
+    return;
+  }
+
+  try {
+    const product = await prisma.product.findUnique({ where: { id: req.params.id } });
+    if (!product) { res.status(404).json({ success: false, message: 'Product not found' }); return; }
+
+    // Delete old image from S3 if exists
+    if (product.imageUrl) await deleteFromS3(product.imageUrl);
+
+    const imageUrl = await uploadToS3(file.buffer, file.mimetype);
+    const updated = await prisma.product.update({ where: { id: req.params.id }, data: { imageUrl } });
+    res.json({ success: true, data: { imageUrl: updated.imageUrl } });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message || 'Failed to upload image' });
   }
 };
 

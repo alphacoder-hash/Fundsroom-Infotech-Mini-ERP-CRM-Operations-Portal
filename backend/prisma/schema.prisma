@@ -62,6 +62,7 @@ model Product {
   currentStock  Int             @default(0)
   minStockAlert Int             @default(0)
   location      String?
+  imageUrl      String?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   movements     StockMovement[]
