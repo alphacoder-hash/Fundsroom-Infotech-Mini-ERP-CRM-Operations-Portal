@@ -20,15 +20,15 @@ const ProductsPage: React.FC = () => {
   const [form, setForm] = useState(initialForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState('');
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [showStockModal, setShowStockModal] = useState(false);
   const [stockProduct, setStockProduct] = useState<any>(null);
   const [stockForm, setStockForm] = useState(initialStock);
   const [stockError, setStockError] = useState('');
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [showMovements, setShowMovements] = useState(false);
   const [movements, setMovements] = useState<any[]>([]);
@@ -254,20 +254,12 @@ const ProductsPage: React.FC = () => {
                 <div className="banner banner-danger" style={{ marginBottom: 14 }}>{formErrors.submit}</div>
               )}
 
-              {/* Image upload */}
               <div className="form-group">
                 <label className="form-label">Product Image</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    style={{
-                      width: 72, height: 72, borderRadius: 10, border: '2px dashed var(--border)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer', overflow: 'hidden', flexShrink: 0, background: 'var(--surface-2)',
-                      transition: 'border-color 0.15s',
-                    }}
-                    onMouseOver={e => (e.currentTarget.style.borderColor = 'var(--indigo)')}
-                    onMouseOut={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+                    style={{ width: 72, height: 72, borderRadius: 10, border: '2px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, background: 'var(--surface-2)' }}
                   >
                     {imagePreview
                       ? <img src={imagePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
